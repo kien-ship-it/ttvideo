@@ -81,11 +81,11 @@ function createParticipantToken(
   };
   at.addGrant(grant);
 
-  if (agentName) {
-    at.roomConfig = new RoomConfiguration({
-      agents: [{ agentName }],
-    });
-  }
+  // Always configure room to dispatch an agent
+  // If agentName is provided, use it; otherwise dispatch to any available agent
+  at.roomConfig = new RoomConfiguration({
+    agents: [{ agentName: agentName || '' }],
+  });
 
   return at.toJwt();
 }

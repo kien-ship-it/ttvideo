@@ -2,7 +2,7 @@
 
 import { type HTMLAttributes, useCallback, useState } from 'react';
 import { Track } from 'livekit-client';
-import { useChat, useRemoteParticipants } from '@livekit/components-react';
+import { useChat, useRemoteParticipants, useVoiceAssistant } from '@livekit/components-react';
 import { ChatTextIcon, PhoneDisconnectIcon } from '@phosphor-icons/react/dist/ssr';
 import { TrackToggle } from '@/components/livekit/agent-control-bar/track-toggle';
 import { Button } from '@/components/livekit/button';
@@ -42,6 +42,7 @@ export function AgentControlBar({
   ...props
 }: AgentControlBarProps & HTMLAttributes<HTMLDivElement>) {
   const { send } = useChat();
+  const { state: agentState } = useVoiceAssistant();
   const participants = useRemoteParticipants();
   const [chatOpen, setChatOpen] = useState(false);
   const publishPermissions = usePublishPermissions();
@@ -78,6 +79,10 @@ export function AgentControlBar({
 
   const isAgentAvailable = participants.some((p) => p.isAgent);
 
+  // Requirement 2.4: Disable input while processing
+  // Agent is processing when in 'thinking' or 'speaking' state
+  const isAgentProcessing = agentState === 'thinking' || agentState === 'speaking';
+
   return (
     <div
       aria-label="Voice assistant controls"
@@ -92,6 +97,7 @@ export function AgentControlBar({
         <ChatInput
           chatOpen={chatOpen}
           isAgentAvailable={isAgentAvailable}
+          isAgentProcessing={isAgentProcessing}
           onSend={handleSendMessage}
         />
       )}

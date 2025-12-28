@@ -10,6 +10,7 @@ import {
   useVoiceAssistant,
 } from '@livekit/components-react';
 import { cn } from '@/lib/utils';
+import { StateIndicator, mapAgentStateToSystemState } from './state-indicator';
 
 const MotionContainer = motion.create('div');
 
@@ -91,6 +92,9 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
   const videoWidth = agentVideoTrack?.publication.dimensions?.width ?? 0;
   const videoHeight = agentVideoTrack?.publication.dimensions?.height ?? 0;
 
+  // Map agent state to system state for the indicator
+  const systemState = mapAgentStateToSystemState(agentState, true, false);
+
   return (
     <div className="pointer-events-none fixed inset-x-0 top-8 bottom-32 z-50 md:top-12 md:bottom-40">
       <div className="relative mx-auto h-full max-w-2xl px-4 md:px-0">
@@ -123,7 +127,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     delay: animationDelay,
                   }}
                   className={cn(
-                    'bg-background aspect-square h-[90px] rounded-md border border-transparent transition-[border,drop-shadow]',
+                    'bg-background relative aspect-square h-[90px] rounded-md border border-transparent transition-[border,drop-shadow]',
                     chatOpen && 'border-input/50 drop-shadow-lg/10 delay-200'
                   )}
                 >
@@ -142,6 +146,12 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                       ])}
                     />
                   </BarVisualizer>
+                  {/* State indicator below audio visualizer when not in chat mode */}
+                  {!chatOpen && (
+                    <div className="pointer-events-auto absolute -bottom-12 left-1/2 -translate-x-1/2">
+                      <StateIndicator state={systemState} />
+                    </div>
+                  )}
                 </MotionContainer>
               )}
 
@@ -174,7 +184,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     },
                   }}
                   className={cn(
-                    'overflow-hidden bg-black drop-shadow-xl/80',
+                    'relative overflow-hidden bg-black drop-shadow-xl/80',
                     chatOpen ? 'h-[90px]' : 'h-auto w-full'
                   )}
                 >
@@ -184,6 +194,12 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     trackRef={agentVideoTrack}
                     className={cn(chatOpen && 'size-[90px] object-cover')}
                   />
+                  {/* State indicator overlay on avatar */}
+                  {!chatOpen && (
+                    <div className="pointer-events-auto absolute bottom-4 left-4">
+                      <StateIndicator state={systemState} />
+                    </div>
+                  )}
                 </MotionContainer>
               )}
             </AnimatePresence>

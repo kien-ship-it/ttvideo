@@ -1,0 +1,4 @@
+# file: /Users/leduckien/personalproject/ttvideo/agent/config.py
+# hypothesis_version: 6.148.8
+
+['LIVEKIT_API_KEY', 'LIVEKIT_API_SECRET', 'LIVEKIT_URL', 'OPENAI_API_KEY', 'TAVUS_API_KEY', 'TAVUS_PERSONA_ID', 'TAVUS_REPLICA_ID']
