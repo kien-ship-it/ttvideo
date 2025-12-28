@@ -1,0 +1,13 @@
+# LiveKit Agents SDK
+livekit-agents>=0.12.0
+
+# LiveKit Plugins
+livekit-plugins-tavus>=0.2.0
+livekit-plugins-openai>=0.10.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=8.0.0
+hypothesis>=6.100.0
