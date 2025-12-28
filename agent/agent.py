@@ -96,14 +96,14 @@ async def entrypoint(ctx: JobContext) -> None:
     tts = openai.TTS(voice="alloy")
     logger.info("TTS initialized")
     
+    # Create the agent
+    agent = DigitalHumanAgent(instructions=DEFAULT_SYSTEM_PROMPT)
+    
     # Create AgentSession
     session = AgentSession(
         llm=llm,
         tts=tts,
     )
-    
-    # Create the agent
-    agent = DigitalHumanAgent(instructions=DEFAULT_SYSTEM_PROMPT)
     
     # Initialize Tavus avatar (with fallback to audio-only)
     avatar = None
@@ -119,28 +119,25 @@ async def entrypoint(ctx: JobContext) -> None:
         logger.warning(f"Tavus avatar initialization failed, falling back to audio-only: {e}")
         audio_only_mode = True
     
-    # Start the session with or without avatar
+    # Start the avatar first, then the session
     try:
         if avatar and not audio_only_mode:
-            # Start session with Tavus avatar for video
-            await session.start(
-                agent=agent,
-                room=ctx.room,
-                avatar=avatar,
-                room_input_options=RoomInputOptions(text_enabled=True),
-            )
-            logger.info("AgentSession started with Tavus avatar (video mode)")
-        else:
-            # Start session without avatar (audio-only)
-            await session.start(
-                agent=agent,
-                room=ctx.room,
-                room_input_options=RoomInputOptions(text_enabled=True),
-            )
-            logger.info("AgentSession started in audio-only mode")
+            # Start the avatar FIRST and wait for it to join
+            await avatar.start(session, room=ctx.room)
+            logger.info("Tavus avatar started and connected to room")
         
+        # Then start the agent session
+        await session.start(
+            agent=agent,
+            room=ctx.room,
+            room_input_options=RoomInputOptions(text_enabled=True),
+        )
+        
+        mode = "video (Tavus avatar)" if avatar and not audio_only_mode else "audio-only"
+        logger.info(f"AgentSession started in {mode} mode")
+            
     except Exception as e:
-        logger.error(f"Failed to start session: {e}\n{traceback.format_exc()}")
+        logger.error(f"Failed to start session or avatar: {e}\n{traceback.format_exc()}")
         raise
 
 
